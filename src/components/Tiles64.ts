@@ -26,8 +26,8 @@ import Pillar_0_Highlight from '../assets/64_Pillar_0_Highlight.png';
 import Pillar_90_Highlight from '../assets/64_Pillar_90_Highlight.png';
 import Pillar_180_Highlight from '../assets/64_Pillar_180_Highlight.png';
 import Pillar_270_Highlight from '../assets/64_Pillar_270_Highlight.png';
+import {TileName} from './NewTiles';
 
-type TileName = "L_0" | "L_90" | "L_180" | "L_270" | "I_0" | "I_90" | "I_180" | "I_270" | "Solid" | "Open" | "Pillar_0" | "Pillar_90" | "Pillar_180" | "Pillar_270" | "L_0_Highlight" | "L_90_Highlight" | "L_180_Highlight" | "L_270_Highlight" | "I_0_Highlight" | "I_90_Highlight" | "I_180_Highlight" | "I_270_Highlight" | "Solid_Highlight" | "Open_Highlight" | "Pillar_0_Highlight" | "Pillar_90_Highlight" | "Pillar_180_Highlight" | "Pillar_270_Highlight";
 type TileData = typeof L_0 | typeof L_90 | typeof L_180 | typeof L_270 | typeof I_0 | typeof I_90 | typeof I_180 | typeof I_270 | typeof Solid | typeof Open | typeof Pillar_0 | typeof Pillar_90 | typeof Pillar_180 | typeof Pillar_270 | typeof L_0_Highlight | typeof L_90_Highlight | typeof L_180_Highlight | typeof L_270_Highlight | typeof I_0_Highlight | typeof I_90_Highlight | typeof I_180_Highlight | typeof I_270_Highlight | typeof Solid_Highlight | typeof Open_Highlight | typeof Pillar_0_Highlight | typeof Pillar_90_Highlight | typeof Pillar_180_Highlight | typeof Pillar_270_Highlight;
 
 type TileType = {
