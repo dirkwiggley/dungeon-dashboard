@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, FormControl, Grid, InputLabel, MenuItem, Select, Stack, Typography, styled } from '@mui/material';
+import { Box, Button, FormControl, Grid, InputLabel, MenuItem, Paper, Select, Stack, Typography, styled } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { MAX_COLUMNS, MAX_ROWS, Rooms, getRoomName, getRoomTiles, getUnusedTileIndexes } from './RoomDefinitions';
 import TilePalette from './TilePalette';
@@ -84,7 +84,7 @@ function MapDisplay() {
     const firstRoomTileIndex = roomTileIndexes[0];
     if (dungeonMap[firstRoomTileIndex].includes(HIGHLIGHT)) {
       toggleDungeonTiles(roomTileIndexes);
-     }
+    }
   }
 
   const unsetUnused = () => {
@@ -173,37 +173,44 @@ function MapDisplay() {
 
   return (
     <Stack minWidth="100vw">
-      <Grid container sx={{ marginTop: 2 }}>
-        <Grid item xs={8}>
-          <div style={{ maxWidth: getMaxWidth(), maxHeight: "1024px" }}>
-            {getDisplayTiles()}
-            <Grid container justifyContent='space-evenly'>
-              <Grid item xs={6}>
-                <FormControl fullWidth style={{ marginTop: "15px", marginLeft: 20 }}>
-                  <InputLabel id="size-select-label">Tile Size</InputLabel>
-                  <Select
-                    labelId="size-select-label"
-                    id="size-select"
-                    value={tileSize}
-                    label="Tile Size"
-                    onChange={handleSizeChange}
-                  >
-                    <MenuItem value={THIRTY_TWO_PX}>{THIRTY_TWO_PX}</MenuItem>
-                    <MenuItem value={SIXTY_FOUR_PX}>{SIXTY_FOUR_PX}</MenuItem>
-                  </Select>
-                </FormControl>
+      <Grid container>
+        <Grid item>
+          <Paper sx={{paddingBottom: 2, bgcolor: "#FCD73F"}}>
+            <Grid container sx={{ marginTop: 2 }}>
+              <Grid item xs={8}>
+                <Box style={{ maxWidth: getMaxWidth(), maxHeight: "1024px", marginTop: "15px" }}>
+                  {getDisplayTiles()}
+                  <Grid container justifyContent='space-evenly'>
+                    <Grid item xs={6}>
+                      <FormControl fullWidth style={{ marginTop: "15px", marginLeft: 20 }}>
+                        <InputLabel id="size-select-label">Tile Size</InputLabel>
+                        <Select
+                          labelId="size-select-label"
+                          id="size-select"
+                          value={tileSize}
+                          label="Tile Size"
+                          onChange={handleSizeChange}
+                        >
+                          <MenuItem value={THIRTY_TWO_PX}>{THIRTY_TWO_PX}</MenuItem>
+                          <MenuItem value={SIXTY_FOUR_PX}>{SIXTY_FOUR_PX}</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Stack>
+                        <Typography style={{ marginTop: 15, marginLeft: 25, boxSizing: "border-box" }}>Room</Typography>
+                        <Typography border={1} style={{ marginLeft: 25, boxSizing: "border-box" }}>{roomName}</Typography>
+                      </Stack>
+                    </Grid>
+                  </Grid>
+                </Box>
               </Grid>
-              <Grid item xs={6}>
-                <Stack>
-                  <Typography style={{ marginTop: 15, marginLeft: 25, boxSizing: "border-box" }}>Room</Typography>
-                  <Typography border={1} style={{ marginLeft: 25, boxSizing: "border-box" }}>{roomName}</Typography>
-                </Stack>
+              <Grid item xs={4}>
+                <TilePalette changeTile={handleChangePaletteTile} changeEditMode={handleChangeEditMode} />
               </Grid>
             </Grid>
-          </div>
-        </Grid>
-        <Grid item xs={4}>
-          <TilePalette changeTile={handleChangePaletteTile} changeEditMode={handleChangeEditMode} />
+
+          </Paper>
         </Grid>
       </Grid>
     </Stack>

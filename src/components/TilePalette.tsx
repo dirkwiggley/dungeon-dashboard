@@ -91,7 +91,7 @@ const TilePalette = (props: { changeTile: any; changeEditMode: any}) => {
   }
 
   return (
-    <Paper sx={{ marginTop: "15px", marginRight: "15px", backgroundColor: "lightGray", minWidth: "244px", maxWidth: "264px" }}>
+    <Paper sx={{ marginTop: "25px", marginRight: "15px", marginLeft: "15px", backgroundColor: "lightGray", minWidth: "244px", maxWidth: "264px" }}>
       <Grid container spacing={1}>
         <Grid item xs={12}>
           <Typography textAlign="center">Tile Palette</Typography>
