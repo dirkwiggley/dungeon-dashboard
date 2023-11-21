@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, Button, FormControl, Grid, InputLabel, MenuItem, Paper, Select, Stack, Typography, styled } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import { MAX_COLUMNS, MAX_ROWS, Rooms, getRoomName, getRoomTiles, getUnusedTileIndexes } from './RoomDefinitions';
+import { MAX_COLUMNS, MAX_ROWS, Room, Rooms, RoomEditor } from './RoomEditor';
 import TilePalette from './TilePalette';
 import { Tiles32 } from './Tiles32';
 import { Tiles64 } from './Tiles64';
@@ -37,15 +37,27 @@ const SIXTY_FOUR_PX = "64px";
 type SizeSelection = typeof THIRTY_TWO_PX | typeof SIXTY_FOUR_PX;
 const HIGHLIGHT = "_Highlight";
 const NO_ROOM_SELECTED = "No room selected";
-
+const TEN_TWENTY_FOUR_PX = "1024px";
+const FIVE_TWELVE_PX = "512px";
+const TWO_FIFTY_SIX_PX = "256px";
 
 function MapDisplay() {
+  const [mapMaxHeight, setMapMaxHeight] = useState<string>(FIVE_TWELVE_PX);
+  const [mapMaxWidth, setMapMaxWidth] = useState<string>(TWO_FIFTY_SIX_PX);
   const [roomName, setRoomName] = useState<string>('');
   const [tileSize, setTileSize] = useState<string>(THIRTY_TWO_PX as string);
   const [columns, setColumns] = useState<number>(MAX_COLUMNS + 1);
   const [toggleable, setToggleable] = useState<boolean>(false);
   const [editMode, setEditMode] = useState<boolean>(false);
   const [paletteTile, setPaletteTile] = useState<TileName>("Solid");
+  const [roomEditor, setRoomEditor] = useState<RoomEditor>();
+  const [selectNewRoomTiles, setSelectNewRoomTiles] = useState<boolean>(false);
+  const [newRoomTiles, setNewRoomTiles] = useState<Array<Room>>();
+
+  useEffect(() => {
+    let rd = new RoomEditor(Rooms);
+    setRoomEditor(rd);
+  }, []);
 
   const getTileManager = () => {
     if (tileSize === THIRTY_TWO_PX) {
@@ -80,15 +92,15 @@ function MapDisplay() {
   }
 
   const unsetRoom = (selectedRoomName: string) => {
-    const roomTileIndexes = getRoomTiles(selectedRoomName);
+    const roomTileIndexes = roomEditor!.getRoomTiles(selectedRoomName);
     const firstRoomTileIndex = roomTileIndexes[0];
-    if (dungeonMap[firstRoomTileIndex].includes(HIGHLIGHT)) {
+    if (dungeonMap && dungeonMap[firstRoomTileIndex] && dungeonMap[firstRoomTileIndex].includes(HIGHLIGHT)) {
       toggleDungeonTiles(roomTileIndexes);
     }
   }
 
   const unsetUnused = () => {
-    const unusedIndexes = getUnusedTileIndexes();
+    const unusedIndexes = roomEditor!.getUnusedTileIndexes();
     let redraw = false;
     unusedIndexes.forEach(index => {
       if (dungeonMap[index].includes(HIGHLIGHT)) {
@@ -97,13 +109,13 @@ function MapDisplay() {
       }
     });
     if (redraw) {
-      setToggleable(!toggleable);
+      updateDisplay();
     }
   }
 
   const toggleDungeonTile = (index: number) => {
     dungeonMap[index] = findNewTileName(index);
-    setToggleable(!toggleable);
+    updateDisplay();
   }
 
   const toggleDungeonTiles = (tileIndexes: Array<number>) => {
@@ -111,27 +123,37 @@ function MapDisplay() {
       const currentTileIndex = tileIndexes[index];
       dungeonMap[currentTileIndex] = findNewTileName(currentTileIndex);
     }
+    updateDisplay();
+  }
+
+  const updateDisplay = () => {
     setToggleable(!toggleable);
   }
 
-  const roomCheck = (index: number) => {
-    let selectedRoomName = getRoomName(index);
-    if (selectedRoomName === '') {
-      selectedRoomName = NO_ROOM_SELECTED;
-      toggleDungeonTile(index);
+  const tileClick = (index: number) => {
+    if (editMode) {
+      unsetOtherRooms('');
+      dungeonMap[index] = paletteTile + HIGHLIGHT as TileName;
+      updateDisplay();
     } else {
-      const roomTileIndexes = getRoomTiles(selectedRoomName);
-      toggleDungeonTiles(roomTileIndexes);
+      let selectedRoomName = roomEditor!.getRoomName(index);
+      if (selectedRoomName === '') {
+        selectedRoomName = NO_ROOM_SELECTED;
+        toggleDungeonTile(index);
+      } else {
+        const roomTileIndexes = roomEditor!.getRoomTiles(selectedRoomName);
+        toggleDungeonTiles(roomTileIndexes);
+      }
+      unsetOtherRooms(selectedRoomName);
+      setRoomName(selectedRoomName);
     }
-    unsetOtherRooms(selectedRoomName);
-    setRoomName(selectedRoomName);
   }
 
   const getMaxWidth = () => {
     if (tileSize === THIRTY_TWO_PX) {
-      return 32 * columns;
+      return 32 * columns - 15;
     } else {
-      return 64 * columns;
+      return 64 * (columns + 3) - 12;
     }
   }
 
@@ -142,14 +164,23 @@ function MapDisplay() {
       const data = getTileManager().getTileData(tileName);
       let newBit = (
         <Grid item wrap="nowrap" key={index} xs={1} style={{ maxWidth: tileSize, maxHeight: tileSize }}>
-          <Button onClick={() => roomCheck(index)} style={{ minWidth: tileSize, maxWidth: tileSize, minHeight: tileSize, maxHeight: tileSize }}>
+          <Button onClick={() => tileClick(index)} style={{ minWidth: tileSize, maxWidth: tileSize, minHeight: tileSize, maxHeight: tileSize }}>
             {<img src={data} />}
           </Button>
         </Grid>);
       returnArray.push(newBit);
     };
     return (
-      <Grid container sx={{ marginLeft: "15px", columns: { columns }, overflowY: "scroll", overflowX: "scroll" }} spacing={0}>
+      <Grid container
+        spacing={0}
+        sx={{
+          marginLeft: "15px",
+          columns: { columns },
+          overflowY: "scroll",
+          overflowX: "scroll",
+          maxHeight: mapMaxHeight,
+          maxWidth: getMaxWidth()
+        }}>
         {returnArray}
       </Grid>
     )
@@ -171,14 +202,18 @@ function MapDisplay() {
     setEditMode(newMode);
   }
 
+  const handleSelectRoomTiles = (newMode: boolean) => {
+    setSelectNewRoomTiles(newMode);
+  }
+
   return (
     <Stack minWidth="100vw">
-      <Grid container>
+      <Grid container sx={{paddingLeft: "15px", minWidth: "100%", maxWidth: "100%"}}>
         <Grid item>
-          <Paper sx={{paddingBottom: 2, bgcolor: "#FCD73F"}}>
+          <Paper sx={{ paddingBottom: 2, bgcolor: "#FFD530", minWidth: "100%", maxWidth: "100%" }}>
             <Grid container sx={{ marginTop: 2 }}>
               <Grid item xs={8}>
-                <Box style={{ maxWidth: getMaxWidth(), maxHeight: "1024px", marginTop: "15px" }}>
+                <Box style={{ minWidth: "100%", maxWidth: "100%", maxHeight: TEN_TWENTY_FOUR_PX, marginTop: "15px" }}>
                   {getDisplayTiles()}
                   <Grid container justifyContent='space-evenly'>
                     <Grid item xs={6}>
@@ -209,7 +244,6 @@ function MapDisplay() {
                 <TilePalette changeTile={handleChangePaletteTile} changeEditMode={handleChangeEditMode} />
               </Grid>
             </Grid>
-
           </Paper>
         </Grid>
       </Grid>

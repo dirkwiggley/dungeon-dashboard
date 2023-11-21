@@ -21,46 +21,55 @@ const EmptyHall: Room = {id: 6, name: "Empty Hall", tiles: [ct(2, 9), ct(2, 10),
 
 export const Rooms: Array<Room> = [Entry, TrapRoom, EntryWay, Armory, Lair, EmptyHall];
 
-export const getRoomName = (index: number): string => {
-  let roomName = '';
-  for (let i = 0; i < Rooms.length; i++) {
-    const room = Rooms[i];
-    if (room.tiles.includes(index)) {
-      roomName = room.name;
-      break;
-    }
-  }
-  return roomName;
-}
+export class RoomEditor {
+  rooms:Array<Room>;
 
-export const getRoomById = (id: number) => {
-  let room;
-  for (let i = 0; i < Rooms.length; i++) {
-    if (id === Rooms[i].id) {
-      room = Rooms[i];
-    }
+  constructor(roomArray: Array<Room>) {
+    this.rooms = [...roomArray];
   }
-  return room;
-}
 
-export const getRoomTiles = (name: string): Array<number> => {
-  for (let i=0; i < Rooms.length; i++) {
-    const room = Rooms[i];
-    if (room.name === name) {
-      return room.tiles;
+  getRoomName = (index: number): string => {
+    let roomName = '';
+    for (let i = 0; i < Rooms.length; i++) {
+      const room = Rooms[i];
+      if (room.tiles.includes(index)) {
+        roomName = room.name;
+        break;
+      }
     }
+    return roomName;
   }
-  return [];
-}
-
-export const getUnusedTileIndexes = () => {
-  const limit = MAX_ROWS * MAX_COLUMNS;
-  const fullArray = [...Array(limit).keys()];
-  const result = [...Entry.tiles, ...TrapRoom.tiles, ...EntryWay.tiles, ...Armory.tiles, ...Lair.tiles, ...EmptyHall.tiles]
-  .filter((set => // store the set and return the actual callback
-      o => set.has(o) ? false : set.add(o)
-    )(new Set()) // use an IIFE to create a Set and store it set
-  );
-  let difference = fullArray.filter(x => !result.includes(x));
-  return difference;
+  
+  getRoomById = (id: number) => {
+    let room;
+    for (let i = 0; i < Rooms.length; i++) {
+      if (id === Rooms[i].id) {
+        room = Rooms[i];
+      }
+    }
+    return room;
+  }
+  
+  getRoomTiles = (name: string): Array<number> => {
+    for (let i=0; i < Rooms.length; i++) {
+      const room = Rooms[i];
+      if (room.name === name) {
+        return room.tiles;
+      }
+    }
+    return [];
+  }
+  
+  getUnusedTileIndexes = () => {
+    const limit = MAX_ROWS * MAX_COLUMNS;
+    const fullArray = [...Array(limit).keys()];
+    const result = [...Entry.tiles, ...TrapRoom.tiles, ...EntryWay.tiles, ...Armory.tiles, ...Lair.tiles, ...EmptyHall.tiles]
+    .filter((set => // store the set and return the actual callback
+        o => set.has(o) ? false : set.add(o)
+      )(new Set()) // use an IIFE to create a Set and store it set
+    );
+    let difference = fullArray.filter(x => !result.includes(x));
+    return difference;
+  }
+  
 }
