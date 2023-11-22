@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Box, Button, FormControl, Grid, InputLabel, MenuItem, Paper, Select, Stack, Typography, styled } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { MAX_COLUMNS, MAX_ROWS, Room, Rooms, RoomEditor } from './RoomEditor';
-import TilePalette from './TilePalette';
+import TilePalette, { SELECT, EDIT, BUILD_ROOM, EditorModes } from './TilePalette';
 import { TileName, NewTiles } from './NewTiles';
 import { Tiles32 } from './Tiles32';
 import { Tiles64 } from './Tiles64';
@@ -46,11 +46,10 @@ function MapDisplay() {
   const [tileSize, setTileSize] = useState<string>(THIRTY_TWO_PX as string);
   const [columns, setColumns] = useState<number>(MAX_COLUMNS + 1);
   const [toggleable, setToggleable] = useState<boolean>(false);
-  const [editMode, setEditMode] = useState<boolean>(false);
+  const [editorMode, setEditMode] = useState<EditorModes>(SELECT);
   const [paletteTile, setPaletteTile] = useState<TileName>("Solid");
   const [roomEditor, setRoomEditor] = useState<RoomEditor>();
   const [newTiles, setNewTiles] = useState<Array<NewTiles>>();
-  const [selectNewRoomTiles, setSelectNewRoomTiles] = useState<boolean>(false);
   const [newRoomTiles, setNewRoomTiles] = useState<Array<NewTiles>>();
 
   useEffect(() => {
@@ -103,7 +102,7 @@ function MapDisplay() {
     for (let i = 0; i < dungeonMap.length; i++) {
       const tileName = dungeonMap[i];
       if (tileName.includes(HIGHLIGHT)) {
-        tiles.push(i)        ;
+        tiles.push(i);
       }
     }
     toggleDungeonTiles(tiles);
@@ -137,42 +136,47 @@ function MapDisplay() {
   }
 
   const tileClick = (index: number) => {
-    if (editMode) {
-      unsetOtherRooms('');
-      // update the newTiles array
-      if (newTiles) {
-        const newTile = {index: index, tileName: paletteTile, oldTileName: dungeonMap[index]};
-        let replacementTiles = [...newTiles];
-        let addTile = true;
-        for (let i = 0; i < newTiles.length; i++) {
-          let tile = replacementTiles[i];
-          if (tile.index === index) {
-            replacementTiles[i] = newTile;
-            addTile = false;
-            break;
+    switch (editorMode) {
+      case SELECT:
+        // Set the room name display
+        let selectedRoomName = roomEditor!.getRoomName(index);
+        if (selectedRoomName === '') {
+          selectedRoomName = NO_ROOM_SELECTED;
+          toggleDungeonTile(index);
+        } else {
+          const roomTileIndexes = roomEditor!.getRoomTiles(selectedRoomName);
+          toggleDungeonTiles(roomTileIndexes);
+        }
+        // unselect other rooms
+        unsetOtherRooms(selectedRoomName);
+        setRoomName(selectedRoomName);
+        break;
+      case EDIT:
+      case BUILD_ROOM:
+        // update the newTiles array
+        if (newTiles) {
+          const newTile = { index: index, tileName: paletteTile, oldTileName: dungeonMap[index] };
+          let replacementTiles = [...newTiles];
+          let addTile = true;
+          for (let i = 0; i < newTiles.length; i++) {
+            let tile = replacementTiles[i];
+            if (tile.index === index) {
+              replacementTiles[i] = newTile;
+              addTile = false;
+              break;
+            }
           }
+          if (addTile) {
+            replacementTiles.push(newTile);
+          }
+          setNewTiles(replacementTiles);
         }
-        if (addTile) {
-          replacementTiles.push(newTile);
-        }
-        setNewTiles(replacementTiles);
-      }
-      // update the acutal map
-      dungeonMap[index] = paletteTile + HIGHLIGHT as TileName;
-      updateDisplay();
-    } else {
-      // Set the room name display
-      let selectedRoomName = roomEditor!.getRoomName(index);
-      if (selectedRoomName === '') {
-        selectedRoomName = NO_ROOM_SELECTED;
-        toggleDungeonTile(index);
-      } else {
-        const roomTileIndexes = roomEditor!.getRoomTiles(selectedRoomName);
-        toggleDungeonTiles(roomTileIndexes);
-      }
-      // unselect other rooms
-      unsetOtherRooms(selectedRoomName);
-      setRoomName(selectedRoomName);
+        // update the acutal map
+        dungeonMap[index] = paletteTile + HIGHLIGHT as TileName;
+        updateDisplay();
+        break;
+      default:
+        break;
     }
   }
 
@@ -221,44 +225,63 @@ function MapDisplay() {
     setPaletteTile(tileName);
   }
 
-  const handleChangeEditMode = (newMode: boolean) => {
-    if (newMode && roomName !== NO_ROOM_SELECTED) {
-      unsetRoom(roomName);
-      unsetUnused();
-      setNewTiles(new Array<NewTiles>());
-      setNewRoomTiles(new Array<NewTiles>());
+  const handleChangeEditMode = (newMode: EditorModes) => {
+    switch (newMode) {
+      case SELECT:
+        unsetAll();
+        break;
+      case EDIT:
+        setNewRoomTiles(new Array<NewTiles>());
+        unsetAll();
+        break;
+      case BUILD_ROOM:
+        setNewRoomTiles(new Array<NewTiles>());
+        unsetAll();
+        break;
     }
     setEditMode(newMode);
   }
 
   const handleCommit = () => {
-    if (editMode) {
-      if (newTiles) {
-        newTiles.forEach(tile => {
-          dungeonMap[tile.index] = tile.tileName;
-        });
-      }
-      setNewTiles(new Array<NewTiles>());
-      unsetOtherRooms('');
-      updateDisplay();
+    if (editorMode === EDIT && newTiles) {
+      newTiles.forEach(tile => {
+        dungeonMap[tile.index] = tile.tileName;
+      });
+    } else if (editorMode === BUILD_ROOM && newTiles) {
+      // TODO
     }
-  }
-
-  const handleSelectRoomTiles = (newMode: boolean) => {
-    setSelectNewRoomTiles(newMode);
+    setNewTiles(new Array<NewTiles>());
+    unsetOtherRooms('');
+    updateDisplay();
   }
 
   const handleCancel = () => {
     unsetOtherRooms('');
     unsetAll();
+    setEditMode(SELECT);
+    setSelectNewRoomTiles(false);
+    setNewRoomTiles(new Array<NewTiles>());
     newTiles?.forEach(tile => {
       dungeonMap[tile.index] = tile.oldTileName;
-    })
+    });
+  }
+
+  const handleCreateRoom = () => {
+    if (newRoomTiles) {
+      const roomIndexes = new Array<number>();
+      roomEditor!.getRooms().forEach(room => {
+        roomIndexes.push(room.id);
+      });
+      const newId: number = roomEditor!.getNextId();
+      const newRoom: Room = { id: newId, name: "New room", tiles: roomIndexes };
+      roomEditor!.addRoom(newRoom);
+      setNewRoomTiles(new Array<NewTiles>());
+    }
   }
 
   return (
     <Stack minWidth="100vw">
-      <Grid container sx={{paddingLeft: "15px", minWidth: "100%", maxWidth: "100%"}}>
+      <Grid container sx={{ paddingLeft: "15px", minWidth: "100%", maxWidth: "100%" }}>
         <Grid item>
           <Paper sx={{ paddingBottom: 2, bgcolor: "#FFD530", minWidth: "100%", maxWidth: "100%" }}>
             <Grid container sx={{ marginTop: 2 }}>
@@ -284,8 +307,10 @@ function MapDisplay() {
                     <Grid item xs={1} />
                     <Grid item xs={6}>
                       <Stack>
-                        <Typography style={{ marginTop: 15, marginLeft: 25, boxSizing: "border-box" }}>Room</Typography>
-                        <Typography border={1} style={{ marginLeft: 25, boxSizing: "border-box" }}>{roomName}</Typography>
+                        <Box border={1} style={{ marginTop: 10, marginLeft: 15 }}>
+                          <Typography style={{ marginTop: 5, marginLeft: 5, boxSizing: "border-box" }}>Room</Typography>
+                          <Typography style={{ marginLeft: 5, marginBottom: 5, boxSizing: "border-box" }}>{roomName}</Typography>
+                        </Box>
                       </Stack>
                     </Grid>
                     <Grid item xs={2} />
@@ -293,9 +318,9 @@ function MapDisplay() {
                 </Box>
               </Grid>
               <Grid item xs={4}>
-                <TilePalette 
-                  changeTile={handleChangePaletteTile} 
-                  changeEditMode={handleChangeEditMode} 
+                <TilePalette
+                  changeTile={handleChangePaletteTile}
+                  changeEditMode={handleChangeEditMode}
                   handleCommit={handleCommit}
                   handleCancel={handleCancel} />
               </Grid>

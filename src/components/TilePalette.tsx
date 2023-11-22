@@ -31,12 +31,24 @@ const tilePalette: Array<TileType> = [
   { name: "Pillar_90", data: Pillar_90 }, { name: "Pillar_180", data: Pillar_180 }, { name: "Pillar_270", data: Pillar_270 }
 ];
 
-type EditingStates = "NOT EDITING" | "EDITING";
+const BTN_TXT_SELECT = "SELECT";
+const BTN_TXT_EDIT = "EDIT";
+const BTN_TXT_BUILD_ROOM = "BUILD ROOM";
+type EditBtnText = typeof BTN_TXT_SELECT | typeof BTN_TXT_EDIT | typeof BTN_TXT_BUILD_ROOM;
+
+export const SELECT = "Select";
+export const EDIT = "Edit";
+export const BUILD_ROOM = "Build Room";
+export const INCREMENT = "Increment";
+export type EditorModes = typeof SELECT | typeof EDIT | typeof BUILD_ROOM | typeof INCREMENT;
+
 
 const StyledButton = styled(Button)(({ theme }) => ({
   color: "white",
   backgroundColor: grey[400],
   borderRadius: 25,
+  minWidth: "90%",
+  maxWidth: "90%",
   '&:hover': {
     backgroundColor: grey[500],
   }
@@ -45,12 +57,11 @@ const StyledButton = styled(Button)(({ theme }) => ({
 const TilePalette = (props: { changeTile: any; changeEditMode: any, handleCommit: any, handleCancel: any }) => {
   const { changeTile, changeEditMode, handleCommit, handleCancel } = props;
   const [paletteTile, setPaletteTile] = useState<TileName>("Solid");
-  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [editorMode, setEditorMode] = useState<EditorModes>(SELECT);
 
   const handlePaletteClick = (index: number) => {
     const tiles32 = Object.create(Tiles32);
     const tileName = tiles32.getTileName(index);
-    const tile = tiles32.getTileData(tileName);
     setPaletteTile(tileName);
     changeTile(tileName);
   }
@@ -80,51 +91,63 @@ const TilePalette = (props: { changeTile: any; changeEditMode: any, handleCommit
     return tiles32.getTileData(paletteTile);
   }
 
-  const getEditModeBtnText = (): EditingStates => {
-    if (isEditing) return "EDITING";
-    return "NOT EDITING";
+  const getEditModeBtnText = (): EditBtnText => {
+    switch (editorMode) {
+      case SELECT:
+        return BTN_TXT_SELECT;
+      case EDIT:
+        return BTN_TXT_EDIT;
+      case BUILD_ROOM:
+        return BTN_TXT_BUILD_ROOM;
+      default:
+        return BTN_TXT_SELECT;
+    }
   }
 
-  const toggleEditMode = () => {
-    setIsEditing(!isEditing);
-    changeEditMode(!isEditing);
+  function onChangeEditMode(mode: EditorModes | null = INCREMENT) {
+    // use default parameter value when null
+    mode = mode ?? INCREMENT;
+    
+    if (mode === INCREMENT) {
+      switch (editorMode) {
+        case SELECT:
+          setEditorMode(EDIT);
+          mode = EDIT;
+          break;
+        case EDIT:
+          setEditorMode(BUILD_ROOM);
+          mode = BUILD_ROOM;
+          break;
+        case BUILD_ROOM:
+          setEditorMode(SELECT);
+          mode = SELECT;
+          break;
+        default:
+          setEditorMode(SELECT);
+      }
+    } else {
+      setEditorMode(mode);
+    }
+    changeEditMode(mode);
   }
 
   const onCommit = () => {
-    toggleEditMode();
+    onChangeEditMode(SELECT);
     handleCommit();
   }
 
   const onCancel = () => {
-    toggleEditMode();
+    onChangeEditMode(SELECT);
     handleCancel();
   }
 
   const getRoomButtons = () => {
-    if (isEditing) {
+    if (editorMode === BUILD_ROOM || editorMode === EDIT) {
       return (
         <>
-          <Divider sx={{ marginBottom: 1 }} />
-          <Grid container spacing={1} sx={{ width: "100%" }}>
-            <Grid item xs={7} sx={{ marginBottom: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Box sx={{ display: "flex", alignItems: "center" }}>
-                <StyledButton variant="contained">Select Tiles</StyledButton>
-              </Box>
-            </Grid>
-            <Grid item xs={5} sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Box sx={{ marginBottom: 1, display: "flex", alignItems: "center" }}>
-                <StyledButton variant="contained" onClick={onCommit}>Commit</StyledButton>
-              </Box>
-            </Grid>
-            <Grid item >
-              <Box sx={{ marginLeft: 1, marginBottom: 1, display: "flex", justifyContent: "center" }}>
-                <StyledButton variant="contained">Create Room</StyledButton>
-              </Box>
-            </Grid>
-            <Grid item >
-              <Box sx={{ marginLeft: 1, marginBottom: 1, display: "flex", justifyContent: "center" }}>
-                <StyledButton variant="contained" onClick={onCancel}>Cancel</StyledButton>
-              </Box>
+          <Grid container spacing={1}>
+            <Grid item xs={12} sx={{ marginBottom: 1, display: "flex", alignItems: "center", justifyContent: "center", minWidth: "100%", maxWidth: "100%" }}>
+              <StyledButton variant="contained" onClick={onCommit}>Commit</StyledButton>
             </Grid>
           </Grid>
         </>
@@ -142,21 +165,30 @@ const TilePalette = (props: { changeTile: any; changeEditMode: any, handleCommit
           </Grid>
           {getDisplayTiles()}
         </Grid>
-        <Grid container sx={{ marginLeft: 1 }}>
-          <Grid item xs={12} sx={{ marginTop: 1 }}>
-            <StyledButton variant="contained" onClick={toggleEditMode}>{getEditModeBtnText()}</StyledButton>
+
+        <Box border={1} sx={{ marginRight: 3, marginLeft: 3 }}>
+          <Grid container>
+            <Grid item xs={8}>
+              <Box style={{ display: "flex", alignItems: "center", justifyContent: "center", marginRight: 2, marginTop: 6, marginBottom: 6 }}>
+                <Typography sx={{ marginTop: 0.5 }}>Selected Block</Typography>
+              </Box>
+            </Grid>
+            <Grid item xs={4}>
+              <Box style={{ display: "flex", alignItems: "center", justifyContent: "left", marginRight: 2, marginTop: 6, marginBottom: 6 }}>
+                <img src={getPaletteTile()} />
+              </Box>
+            </Grid>
+          </Grid>
+        </Box>
+
+        <Grid container sx={{ spacing: 1 }}>
+          <Grid item xs={12} sx={{ marginTop: 1, display: "flex", alignItems: "center", justifyContent: "center", minWidth: "100%", maxWidth: "100%" }}>
+            <StyledButton variant="contained" onClick={() => onChangeEditMode(INCREMENT)}>{getEditModeBtnText()}</StyledButton>
+          </Grid>
+          <Grid item xs={12} sx={{ marginTop: 1, marginBottom: 1, display: "flex", alignItems: "center", justifyContent: "center", minWidth: "100%", maxWidth: "100%" }}>
+            <StyledButton variant="contained" onClick={onCancel}>Cancel</StyledButton>
           </Grid>
 
-          <Grid item xs={6}>
-            <Box style={{ display: "flex", alignItems: "center", justifyContent: "center", marginRight: 2, marginTop: 6, marginBottom: 6 }}>
-              <Typography sx={{ }}>Selected Block</Typography>
-            </Box>
-          </Grid>
-          <Grid item xs={6}>
-            <Box style={{ display: "flex", alignItems: "center", justifyContent: "left", marginRight: 2, marginTop: 6, marginBottom: 6 }}>
-              <img src={getPaletteTile()} />
-            </Box>
-          </Grid>
         </Grid>
         {getRoomButtons()}
       </Stack>

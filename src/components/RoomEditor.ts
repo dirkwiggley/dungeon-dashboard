@@ -28,6 +28,32 @@ export class RoomEditor {
     this.rooms = [...roomArray];
   }
 
+  getRooms = (): Array<Room> => {
+    return this.rooms;
+  }
+
+  addRoom = (newRoom: Room) => {
+    this.rooms.forEach(room => {
+      if (room.name === newRoom.name) {
+        throw new Error("Duplicate room name");
+      }
+    });
+    this.rooms.push(newRoom);
+  }
+
+  setRooms = (newRooms: Array<Room>) => {
+    this.rooms = newRooms;
+  }
+
+  getNextId = () => {
+    let id = 0;
+    for (let i = 0; i < this.rooms.length; i++) {
+      const currentId = this.rooms[i].id;
+      id = currentId > id ? currentId : id;
+    }
+    return id + 1;
+  }
+
   getRoomName = (index: number): string => {
     let roomName = '';
     for (let i = 0; i < Rooms.length; i++) {
