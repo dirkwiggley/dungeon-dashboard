@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Button, FormControl, Grid, InputLabel, MenuItem, Paper, Select, Stack, Typography, styled } from '@mui/material';
+import { Box, Button, FormControl, Grid, InputLabel, MenuItem, Paper, Select, Stack, Tooltip, Typography, styled } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { MAX_COLUMNS, MAX_ROWS, Room, Rooms, RoomEditor } from './RoomEditor';
 import TilePalette, { SELECT, EDIT, BUILD_ROOM, EditorModes } from './TilePalette';
@@ -50,7 +50,6 @@ function MapDisplay() {
   const [paletteTile, setPaletteTile] = useState<TileName>("Solid");
   const [roomEditor, setRoomEditor] = useState<RoomEditor>();
   const [newTiles, setNewTiles] = useState<Array<NewTiles>>();
-  const [newRoomTiles, setNewRoomTiles] = useState<Array<NewTiles>>();
 
   useEffect(() => {
     let rd = new RoomEditor(Rooms);
@@ -152,7 +151,6 @@ function MapDisplay() {
         setRoomName(selectedRoomName);
         break;
       case EDIT:
-      case BUILD_ROOM:
         // update the newTiles array
         if (newTiles) {
           const newTile = { index: index, tileName: paletteTile, oldTileName: dungeonMap[index] };
@@ -175,6 +173,30 @@ function MapDisplay() {
         dungeonMap[index] = paletteTile + HIGHLIGHT as TileName;
         updateDisplay();
         break;
+      case BUILD_ROOM:
+        // update the newTiles array
+        if (newTiles) {
+          let replacementTiles = [...newTiles];
+          let removeTile = false;
+          replacementTiles.forEach(tile => {
+            if (tile.index === index) {
+              removeTile = true;
+            }
+          });
+          if (removeTile) {
+            replacementTiles = newTiles.filter(tile => {
+              return tile.index !== index;
+            });
+          } else {
+            const newTile = { index: index, tileName: dungeonMap[index], oldTileName: dungeonMap[index] };
+            replacementTiles.push(newTile);
+          }
+          setNewTiles(replacementTiles);
+        }
+        // update the acutal map
+        toggleDungeonTile(index);
+        updateDisplay();
+        break;
       default:
         break;
     }
@@ -188,6 +210,11 @@ function MapDisplay() {
     }
   }
 
+  const getRoomName = (index: number): string => {
+    const name = roomEditor?.getRoomName(index);
+    return name ? name : "";
+  }
+
   const getDisplayTiles = () => {
     const returnArray = [];
     for (let index = 0; index < dungeonMap.length; index++) {
@@ -195,9 +222,11 @@ function MapDisplay() {
       const data = getTileManager().getTileData(tileName);
       let newBit = (
         <Grid item wrap="nowrap" key={index} xs={1} style={{ maxWidth: tileSize, maxHeight: tileSize }}>
-          <Button onClick={() => tileClick(index)} style={{ minWidth: tileSize, maxWidth: tileSize, minHeight: tileSize, maxHeight: tileSize }}>
-            {<img src={data} />}
-          </Button>
+          <Tooltip title={getRoomName(index)}>
+            <Button onClick={() => tileClick(index)} style={{ minWidth: tileSize, maxWidth: tileSize, minHeight: tileSize, maxHeight: tileSize }}>
+              {<img src={data} />}
+            </Button>
+          </Tooltip>
         </Grid>);
       returnArray.push(newBit);
     };
@@ -231,27 +260,33 @@ function MapDisplay() {
         unsetAll();
         break;
       case EDIT:
-        setNewRoomTiles(new Array<NewTiles>());
+        setNewTiles(new Array<NewTiles>());
         unsetAll();
         break;
       case BUILD_ROOM:
-        setNewRoomTiles(new Array<NewTiles>());
+        setNewTiles(new Array<NewTiles>());
         unsetAll();
         break;
     }
     setEditMode(newMode);
   }
 
-  const handleCommit = () => {
+  const handleCommit = (roomName: string = "") => {
     if (editorMode === EDIT && newTiles) {
       newTiles.forEach(tile => {
         dungeonMap[tile.index] = tile.tileName;
       });
     } else if (editorMode === BUILD_ROOM && newTiles) {
-      // TODO
+      const newId: number = roomEditor!.getNextId();
+      const tileIndexes = new Array<number>();
+      newTiles.forEach(tile => {
+        tileIndexes.push(tile.index);
+      })
+      const newRoom: Room = { id: newId, name: roomName, tiles: tileIndexes };
+      roomEditor!.addRoom(newRoom);
     }
     setNewTiles(new Array<NewTiles>());
-    unsetOtherRooms('');
+    unsetAll();
     updateDisplay();
   }
 
@@ -259,23 +294,10 @@ function MapDisplay() {
     unsetOtherRooms('');
     unsetAll();
     setEditMode(SELECT);
-    setNewRoomTiles(new Array<NewTiles>());
+    setNewTiles(new Array<NewTiles>());
     newTiles?.forEach(tile => {
       dungeonMap[tile.index] = tile.oldTileName;
     });
-  }
-
-  const handleCreateRoom = () => {
-    if (newRoomTiles) {
-      const roomIndexes = new Array<number>();
-      roomEditor!.getRooms().forEach(room => {
-        roomIndexes.push(room.id);
-      });
-      const newId: number = roomEditor!.getNextId();
-      const newRoom: Room = { id: newId, name: "New room", tiles: roomIndexes };
-      roomEditor!.addRoom(newRoom);
-      setNewRoomTiles(new Array<NewTiles>());
-    }
   }
 
   return (

@@ -19,7 +19,7 @@ const Armory: Room = {id: 4, name: "Armory", tiles: [ct(4, 0), ct(4, 1), ct(4, 2
 const Lair: Room = {id: 5, name: "Lair", tiles: [ct(4, 4), ct(4, 5), ct(4, 6), ct(4, 7), ct(4, 8), ct(4, 9), ct(4, 10), ct(5, 4), ct(5, 5), ct(5, 6), ct(5, 7), ct(5, 8), ct(5, 9), ct(5, 10), ct(6, 4), ct(6, 5), ct(6, 6), ct(6, 7), ct(6, 8), ct(6, 9), ct(6, 10), ct(7, 4), ct(7, 5), ct(7, 6), ct(7, 7), ct(7, 8), ct(7, 9), ct(7, 10), ct(8, 4), ct(8, 5), ct(8, 6), ct(8, 7), ct(8, 8), ct(8, 9), ct(8, 10) ]}
 const EmptyHall: Room = {id: 6, name: "Empty Hall", tiles: [ct(2, 9), ct(2, 10), ct(2, 11), ct(2, 12), ct(2, 13), ct(2, 14)]}
 
-export const Rooms: Array<Room> = [Entry, TrapRoom, EntryWay, Armory, Lair, EmptyHall];
+export let Rooms: Array<Room> = [Entry, TrapRoom, EntryWay, Armory, Lair, EmptyHall];
 
 export class RoomEditor {
   rooms:Array<Room>;
@@ -56,8 +56,8 @@ export class RoomEditor {
 
   getRoomName = (index: number): string => {
     let roomName = '';
-    for (let i = 0; i < Rooms.length; i++) {
-      const room = Rooms[i];
+    for (let i = 0; i < this.rooms.length; i++) {
+      const room = this.rooms[i];
       if (room.tiles.includes(index)) {
         roomName = room.name;
         break;
@@ -77,8 +77,8 @@ export class RoomEditor {
   }
   
   getRoomTiles = (name: string): Array<number> => {
-    for (let i=0; i < Rooms.length; i++) {
-      const room = Rooms[i];
+    for (let i=0; i < this.rooms.length; i++) {
+      const room = this.rooms[i];
       if (room.name === name) {
         return room.tiles;
       }
