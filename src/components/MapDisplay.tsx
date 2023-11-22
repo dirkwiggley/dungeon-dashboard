@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Button, FormControl, Grid, InputLabel, MenuItem, Paper, Select, Stack, Tooltip, Typography, styled } from '@mui/material';
-import { grey } from '@mui/material/colors';
+import { Box, Button, FormControl, Grid, InputLabel, MenuItem, Paper, Select, Stack, Tooltip, Typography } from '@mui/material';
 import { MAX_COLUMNS, MAX_ROWS, Room, Rooms, RoomEditor } from './RoomEditor';
 import TilePalette, { SELECT, EDIT, BUILD_ROOM, EditorModes } from './TilePalette';
 import { TileName, NewTiles } from './NewTiles';
@@ -75,7 +74,8 @@ function MapDisplay() {
     return dungeonTileName;
   }
 
-  const unsetOtherRooms = (selectedRoomName: string) => {
+  const getOtherHighlitRoomTiles = (selectedRoomName: string) => {
+    let tiles = new Array<number>();
     const rooms = roomEditor!.getRooms();
     for (let i = 0; i < rooms.length; i++) {
       const currentRoomName = roomEditor!.getRoomName(i);
@@ -83,18 +83,29 @@ function MapDisplay() {
         const roomTileIndexes = roomEditor!?.getRoomTiles(currentRoomName);
         const firstRoomTileIndex = roomTileIndexes[0];
         if (dungeonMap[firstRoomTileIndex].includes(HIGHLIGHT)) {
-          toggleDungeonTiles(roomTileIndexes);
+          tiles.push(...roomTileIndexes);
         }
       }
     }
+    return tiles;
   }
 
-  const unsetRoom = (selectedRoomName: string) => {
-    const roomTileIndexes = roomEditor!.getRoomTiles(selectedRoomName);
-    const firstRoomTileIndex = roomTileIndexes[0];
-    if (dungeonMap && dungeonMap[firstRoomTileIndex] && dungeonMap[firstRoomTileIndex].includes(HIGHLIGHT)) {
-      toggleDungeonTiles(roomTileIndexes);
+  const unsetOtherRooms = (selectedRoomName: string) => {
+    const indexes: Array<number> = getOtherHighlitRoomTiles(selectedRoomName);
+    if (indexes.length > 0) {
+      toggleDungeonTiles(indexes!);
     }
+  }
+
+  const unsetUnusedTiles = (selectedRoomName: string) => {
+    const roomIndexes: Array<number> = getOtherHighlitRoomTiles(selectedRoomName);
+    const allIndexes: Array<number> = Array.from(Array(dungeonMap.length).keys());
+    allIndexes.forEach(index => {
+      const tileIsHighlight = dungeonMap[index].includes(HIGHLIGHT);
+      if (!roomIndexes.includes(index) && tileIsHighlight) {
+        toggleDungeonTile(index);
+      }
+    });
   }
 
   const unsetAll = () => {
@@ -106,16 +117,6 @@ function MapDisplay() {
       }
     }
     toggleDungeonTiles(tiles);
-  }
-
-  const unsetUnused = () => {
-    const unusedIndexes = roomEditor!.getUnusedTileIndexes();
-    unusedIndexes.forEach(index => {
-      if (dungeonMap[index].includes(HIGHLIGHT)) {
-        dungeonMap[index] = findNewTileName(index);
-      }
-    });
-    updateDisplay();
   }
 
   const toggleDungeonTile = (index: number) => {
@@ -142,12 +143,13 @@ function MapDisplay() {
         let selectedRoomName = roomEditor!.getRoomNameByTileIndex(index);
         if (selectedRoomName === '') {
           selectedRoomName = NO_ROOM_SELECTED;
+          unsetUnusedTiles(selectedRoomName);
           toggleDungeonTile(index);
         } else {
+          unsetUnusedTiles(selectedRoomName);
           const roomTileIndexes = roomEditor!.getRoomTiles(selectedRoomName);
           toggleDungeonTiles(roomTileIndexes);
         }
-        // unselect other rooms
         unsetOtherRooms(selectedRoomName);
         setRoomName(selectedRoomName);
         break;
@@ -203,11 +205,11 @@ function MapDisplay() {
     }
   }
 
-  const getMaxWidth = () => {
+  const getMaxWidthPx = () => {
     if (tileSize === THIRTY_TWO_PX) {
-      return 32 * columns - 15;
+      return (32 * (columns - 1)).toString()+"px";
     } else {
-      return 64 * (columns + 3) - 12;
+      return (64 * (columns - 1)).toString()+"px";
     }
   }
 
@@ -218,33 +220,37 @@ function MapDisplay() {
 
   const getDisplayTiles = () => {
     const returnArray = [];
-    for (let index = 0; index < dungeonMap.length; index++) {
-      const tileName = dungeonMap[index];
-      const data = getTileManager().getTileData(tileName);
-      let newBit = (
-        <Grid item wrap="nowrap" key={index} xs={1} style={{ maxWidth: tileSize, maxHeight: tileSize }}>
-          <Tooltip title={getRoomNameByTileIndex(index)}>
-            <Button onClick={() => tileClick(index)} style={{ minWidth: tileSize, maxWidth: tileSize, minHeight: tileSize, maxHeight: tileSize }}>
-              {<img src={data} />}
-            </Button>
-          </Tooltip>
-        </Grid>);
-      returnArray.push(newBit);
-    };
+    const mc = MAX_COLUMNS;
+    const mr = MAX_ROWS;
+    let index = 0;
+    for (let rowCounter = 0; rowCounter < mr; rowCounter++) {
+      let tempArray = [];
+      console.log(`Starting row ${rowCounter}`);
+      for (let columnCounter = 0; columnCounter < mc; columnCounter++) {
+        const tileName = dungeonMap[index];
+        const data = getTileManager().getTileData(tileName);
+        console.log(`Inserting tile ${index}, ${tileName}`);
+        // In the button the index was being updated by the incrementer below so this is necessary
+        const currentIndex = index;
+        const newBit = (
+          <Box key={`${rowCounter.toString()}_${columnCounter.toString()}`} style={{ maxWidth: tileSize, maxHeight: tileSize }}>
+            <Tooltip title={getRoomNameByTileIndex(index)}>
+              <Button onClick={() => tileClick(currentIndex)} style={{ minWidth: tileSize, maxWidth: tileSize, minHeight: tileSize, maxHeight: tileSize }}>
+                {<img src={data} />}
+              </Button>
+            </Tooltip>
+          </Box>
+        );
+        index += 1;
+        tempArray.push(newBit);
+      }
+      returnArray.push(<Box key={`row_${rowCounter.toString()}`} sx={{ display: "flex" }}>{tempArray}</Box>);
+    }
     return (
-      <Grid container
-        spacing={0}
-        sx={{
-          marginLeft: "15px",
-          columns: { columns },
-          overflowY: "scroll",
-          overflowX: "scroll",
-          maxHeight: mapMaxHeight,
-          maxWidth: getMaxWidth()
-        }}>
+      <Box border={1} sx={{minWidth: getMaxWidthPx(), maxWidth: getMaxWidthPx(), marginLeft: 2}}>
         {returnArray}
-      </Grid>
-    )
+      </Box>
+    );
   }
 
   const handleSizeChange = (event: { target: { value: any; }; }) => {
@@ -307,7 +313,7 @@ function MapDisplay() {
         <Grid item>
           <Paper sx={{ paddingBottom: 2, bgcolor: "#FFD530", minWidth: "100%", maxWidth: "100%" }}>
             <Grid container sx={{ marginTop: 2 }}>
-              <Grid item xs={8}>
+              <Grid item>
                 <Box style={{ minWidth: "100%", maxWidth: "100%", maxHeight: TEN_TWENTY_FOUR_PX, marginTop: "15px" }}>
                   {getDisplayTiles()}
                   <Grid container justifyContent='space-evenly'>
@@ -320,6 +326,7 @@ function MapDisplay() {
                           value={tileSize}
                           label="Tile Size"
                           onChange={handleSizeChange}
+                          color="secondary"
                         >
                           <MenuItem value={THIRTY_TWO_PX}>{THIRTY_TWO_PX}</MenuItem>
                           <MenuItem value={SIXTY_FOUR_PX}>{SIXTY_FOUR_PX}</MenuItem>
@@ -339,7 +346,7 @@ function MapDisplay() {
                   </Grid>
                 </Box>
               </Grid>
-              <Grid item xs={4}>
+              <Grid item>
                 <TilePalette
                   changeTile={handleChangePaletteTile}
                   changeEditMode={handleChangeEditMode}
