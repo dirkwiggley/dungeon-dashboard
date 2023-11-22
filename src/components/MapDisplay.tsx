@@ -259,7 +259,6 @@ function MapDisplay() {
     unsetOtherRooms('');
     unsetAll();
     setEditMode(SELECT);
-    setSelectNewRoomTiles(false);
     setNewRoomTiles(new Array<NewTiles>());
     newTiles?.forEach(tile => {
       dungeonMap[tile.index] = tile.oldTileName;
