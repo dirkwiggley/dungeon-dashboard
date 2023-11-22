@@ -76,10 +76,11 @@ function MapDisplay() {
   }
 
   const unsetOtherRooms = (selectedRoomName: string) => {
-    for (let i = 0; i < Rooms.length; i++) {
-      const currentRoomName = Rooms[i].name;
+    const rooms = roomEditor!.getRooms();
+    for (let i = 0; i < rooms.length; i++) {
+      const currentRoomName = roomEditor!.getRoomName(i);
       if (currentRoomName !== selectedRoomName) {
-        const roomTileIndexes = Rooms[i].tiles;
+        const roomTileIndexes = roomEditor!?.getRoomTiles(currentRoomName);
         const firstRoomTileIndex = roomTileIndexes[0];
         if (dungeonMap[firstRoomTileIndex].includes(HIGHLIGHT)) {
           toggleDungeonTiles(roomTileIndexes);
@@ -138,7 +139,7 @@ function MapDisplay() {
     switch (editorMode) {
       case SELECT:
         // Set the room name display
-        let selectedRoomName = roomEditor!.getRoomName(index);
+        let selectedRoomName = roomEditor!.getRoomNameByTileIndex(index);
         if (selectedRoomName === '') {
           selectedRoomName = NO_ROOM_SELECTED;
           toggleDungeonTile(index);
@@ -210,8 +211,8 @@ function MapDisplay() {
     }
   }
 
-  const getRoomName = (index: number): string => {
-    const name = roomEditor?.getRoomName(index);
+  const getRoomNameByTileIndex = (index: number): string => {
+    const name = roomEditor?.getRoomNameByTileIndex(index);
     return name ? name : "";
   }
 
@@ -222,7 +223,7 @@ function MapDisplay() {
       const data = getTileManager().getTileData(tileName);
       let newBit = (
         <Grid item wrap="nowrap" key={index} xs={1} style={{ maxWidth: tileSize, maxHeight: tileSize }}>
-          <Tooltip title={getRoomName(index)}>
+          <Tooltip title={getRoomNameByTileIndex(index)}>
             <Button onClick={() => tileClick(index)} style={{ minWidth: tileSize, maxWidth: tileSize, minHeight: tileSize, maxHeight: tileSize }}>
               {<img src={data} />}
             </Button>

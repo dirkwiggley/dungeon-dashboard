@@ -54,7 +54,11 @@ export class RoomEditor {
     return id + 1;
   }
 
-  getRoomName = (index: number): string => {
+  getRoomName = (index: number) => {
+    return this.rooms[index].name;
+  }
+
+  getRoomNameByTileIndex = (index: number): string => {
     let roomName = '';
     for (let i = 0; i < this.rooms.length; i++) {
       const room = this.rooms[i];
