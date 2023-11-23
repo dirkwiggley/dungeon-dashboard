@@ -41,6 +41,15 @@ export class RoomEditor {
     this.rooms.push(newRoom);
   }
 
+  removeRoom = (roomName: string) => {
+    this.rooms.forEach(room => {
+      if (room.name === roomName) {
+        const newRooms = this.rooms.filter(room => room.name !== roomName);
+        this.rooms = newRooms;
+      }
+    });
+  }
+
   setRooms = (newRooms: Array<Room>) => {
     this.rooms = newRooms;
   }

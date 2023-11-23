@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Button, FormControl, Grid, InputLabel, MenuItem, Paper, Select, Stack, Tooltip, Typography } from '@mui/material';
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, Grid, InputLabel, MenuItem, Paper, Select, Stack, Tooltip, Typography, styled } from '@mui/material';
 import { MAX_COLUMNS, MAX_ROWS, Room, Rooms, RoomEditor } from './RoomEditor';
 import TilePalette, { SELECT, EDIT, BUILD_ROOM, EditorModes } from './TilePalette';
 import { TileName, NewTiles } from './NewTiles';
@@ -38,6 +38,20 @@ const TEN_TWENTY_FOUR_PX = "1024px";
 const FIVE_TWELVE_PX = "512px";
 const TWO_FIFTY_SIX_PX = "256px";
 
+const StyledSelect = styled(Select)(() => ({
+  "&.MuiOutlinedInput-root": {
+    "& fieldset": {
+      borderColor: "black"
+    },
+    "&:hover fieldset": {
+      borderColor: "grey"
+    },
+    "&.Mui-focused fieldset": {
+      borderColor: "grey"
+    },
+  }
+}));
+
 function MapDisplay() {
   const [mapMaxHeight, setMapMaxHeight] = useState<string>(FIVE_TWELVE_PX);
   const [mapMaxWidth, setMapMaxWidth] = useState<string>(TWO_FIFTY_SIX_PX);
@@ -49,6 +63,7 @@ function MapDisplay() {
   const [paletteTile, setPaletteTile] = useState<TileName>("Solid");
   const [roomEditor, setRoomEditor] = useState<RoomEditor>();
   const [newTiles, setNewTiles] = useState<Array<NewTiles>>();
+  const [deleteRoomName, setDeleteRoomName] = useState<string>('');
 
   useEffect(() => {
     let rd = new RoomEditor(Rooms);
@@ -154,6 +169,10 @@ function MapDisplay() {
         setRoomName(selectedRoomName);
         break;
       case EDIT:
+        let deleteRoomName = roomEditor!.getRoomNameByTileIndex(index);
+        if (deleteRoomName !== '') {
+          setDeleteRoomName(deleteRoomName);
+        }
         // update the newTiles array
         if (newTiles) {
           const newTile = { index: index, tileName: paletteTile, oldTileName: dungeonMap[index] };
@@ -207,9 +226,9 @@ function MapDisplay() {
 
   const getMaxWidthPx = () => {
     if (tileSize === THIRTY_TWO_PX) {
-      return (32 * (columns - 1)).toString()+"px";
+      return (32 * (columns - 1)).toString() + "px";
     } else {
-      return (64 * (columns - 1)).toString()+"px";
+      return (64 * (columns - 1)).toString() + "px";
     }
   }
 
@@ -220,16 +239,12 @@ function MapDisplay() {
 
   const getDisplayTiles = () => {
     const returnArray = [];
-    const mc = MAX_COLUMNS;
-    const mr = MAX_ROWS;
     let index = 0;
-    for (let rowCounter = 0; rowCounter < mr; rowCounter++) {
+    for (let rowCounter = 0; rowCounter < MAX_ROWS; rowCounter++) {
       let tempArray = [];
-      console.log(`Starting row ${rowCounter}`);
-      for (let columnCounter = 0; columnCounter < mc; columnCounter++) {
+      for (let columnCounter = 0; columnCounter < MAX_COLUMNS; columnCounter++) {
         const tileName = dungeonMap[index];
         const data = getTileManager().getTileData(tileName);
-        console.log(`Inserting tile ${index}, ${tileName}`);
         // In the button the index was being updated by the incrementer below so this is necessary
         const currentIndex = index;
         const newBit = (
@@ -247,7 +262,7 @@ function MapDisplay() {
       returnArray.push(<Box key={`row_${rowCounter.toString()}`} sx={{ display: "flex" }}>{tempArray}</Box>);
     }
     return (
-      <Box border={1} sx={{minWidth: getMaxWidthPx(), maxWidth: getMaxWidthPx(), marginLeft: 2}}>
+      <Box border={1} sx={{ minWidth: getMaxWidthPx(), maxWidth: getMaxWidthPx(), minHeight: "300px", maxHeight: "300px", marginLeft: 2, overflowX: "scroll", overflowY: "scroll" }}>
         {returnArray}
       </Box>
     );
@@ -307,11 +322,47 @@ function MapDisplay() {
     });
   }
 
+  const handleCloseDeleteRoom = () => {
+    setDeleteRoomName('');
+  }
+
+  const handleDeleteRoom = () => {
+    roomEditor?.removeRoom(deleteRoomName);
+    setDeleteRoomName('');
+  }
+
   return (
-    <Stack minWidth="100vw">
+    <Stack minWidth="100vw" sx={{marginTop: 2}}>
       <Grid container sx={{ paddingLeft: "15px", minWidth: "100%", maxWidth: "100%" }}>
         <Grid item>
-          <Paper sx={{ paddingBottom: 2, bgcolor: "#FFD530", minWidth: "100%", maxWidth: "100%" }}>
+          <Paper sx={{ paddingBottom: 2, bgcolor: "#c9a00c", minWidth: "100%", maxWidth: "100%" }}>
+            <Grid container>
+              <Grid item xs={12}>
+              <Dialog
+                open={deleteRoomName !== ''}
+                onClose={handleCloseDeleteRoom}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+              >
+              <DialogTitle id="alert-dialog-title">
+                {`Delete the room ${deleteRoomName}?`}
+              </DialogTitle>
+              <DialogContent>
+                <DialogContentText id="alert-dialog-description">
+                  This action will not delete tiles, just information on the
+                  grouping of tiles that make up the room to be deleted.
+                </DialogContentText>
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleDeleteRoom}>OK</Button>
+                <Button onClick={handleCloseDeleteRoom} autoFocus>
+                  Cancel
+                </Button>
+              </DialogActions>
+            </Dialog>
+
+              </Grid>
+            </Grid>
             <Grid container sx={{ marginTop: 2 }}>
               <Grid item>
                 <Box style={{ minWidth: "100%", maxWidth: "100%", maxHeight: TEN_TWENTY_FOUR_PX, marginTop: "15px" }}>
@@ -320,17 +371,16 @@ function MapDisplay() {
                     <Grid item xs={3}>
                       <FormControl fullWidth style={{ marginTop: "15px", marginLeft: 20 }}>
                         <InputLabel id="size-select-label">Tile Size</InputLabel>
-                        <Select
+                        <StyledSelect
                           labelId="size-select-label"
                           id="size-select"
                           value={tileSize}
                           label="Tile Size"
                           onChange={handleSizeChange}
-                          color="secondary"
                         >
                           <MenuItem value={THIRTY_TWO_PX}>{THIRTY_TWO_PX}</MenuItem>
                           <MenuItem value={SIXTY_FOUR_PX}>{SIXTY_FOUR_PX}</MenuItem>
-                        </Select>
+                        </StyledSelect>
                       </FormControl>
                     </Grid>
                     <Grid item xs={1} />
