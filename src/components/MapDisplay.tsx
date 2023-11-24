@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, Grid, InputLabel, MenuItem, Paper, Select, Stack, Tooltip, Typography, styled } from '@mui/material';
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, Grid, InputLabel, MenuItem, Paper, Select, Switch, Stack, Tooltip, Typography, styled, FormLabel, FormGroup, FormControlLabel, FormHelperText } from '@mui/material';
 import { MAX_COLUMNS, MAX_ROWS, Room, Rooms, RoomEditor } from './RoomEditor';
 import TilePalette, { SELECT, EDIT, BUILD_ROOM, EditorModes } from './TilePalette';
 import { TileName, NewTiles } from './NewTiles';
@@ -64,6 +64,7 @@ function MapDisplay() {
   const [roomEditor, setRoomEditor] = useState<RoomEditor>();
   const [newTiles, setNewTiles] = useState<Array<NewTiles>>();
   const [deleteRoomName, setDeleteRoomName] = useState<string>('');
+  const [showGrid, setShowGrid] = useState<boolean>(false);
 
   useEffect(() => {
     let rd = new RoomEditor(Rooms);
@@ -243,7 +244,10 @@ function MapDisplay() {
     for (let rowCounter = 0; rowCounter < MAX_ROWS; rowCounter++) {
       let tempArray = [];
       for (let columnCounter = 0; columnCounter < MAX_COLUMNS; columnCounter++) {
-        const tileName = dungeonMap[index];
+        let tileName = dungeonMap[index];
+        if (!showGrid) {
+          tileName += "_GO";
+        }
         const data = getTileManager().getTileData(tileName);
         // In the button the index was being updated by the incrementer below so this is necessary
         const currentIndex = index;
@@ -331,35 +335,39 @@ function MapDisplay() {
     setDeleteRoomName('');
   }
 
+  const handleShowGrid = () => {
+    setShowGrid(!showGrid);
+  }
+
   return (
-    <Stack minWidth="100vw" sx={{marginTop: 2}}>
+    <Stack minWidth="100vw" sx={{ marginTop: 2 }}>
       <Grid container sx={{ paddingLeft: "15px", minWidth: "100%", maxWidth: "100%" }}>
         <Grid item>
           <Paper sx={{ paddingBottom: 2, bgcolor: "#c9a00c", minWidth: "100%", maxWidth: "100%" }}>
             <Grid container>
               <Grid item xs={12}>
-              <Dialog
-                open={deleteRoomName !== ''}
-                onClose={handleCloseDeleteRoom}
-                aria-labelledby="alert-dialog-title"
-                aria-describedby="alert-dialog-description"
-              >
-              <DialogTitle id="alert-dialog-title">
-                {`Delete the room ${deleteRoomName}?`}
-              </DialogTitle>
-              <DialogContent>
-                <DialogContentText id="alert-dialog-description">
-                  This action will not delete tiles, just information on the
-                  grouping of tiles that make up the room to be deleted.
-                </DialogContentText>
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={handleDeleteRoom}>OK</Button>
-                <Button onClick={handleCloseDeleteRoom} autoFocus>
-                  Cancel
-                </Button>
-              </DialogActions>
-            </Dialog>
+                <Dialog
+                  open={deleteRoomName !== ''}
+                  onClose={handleCloseDeleteRoom}
+                  aria-labelledby="alert-dialog-title"
+                  aria-describedby="alert-dialog-description"
+                >
+                  <DialogTitle id="alert-dialog-title">
+                    {`Delete the room ${deleteRoomName}?`}
+                  </DialogTitle>
+                  <DialogContent>
+                    <DialogContentText id="alert-dialog-description">
+                      This action will not delete tiles, just information on the
+                      grouping of tiles that make up the room to be deleted.
+                    </DialogContentText>
+                  </DialogContent>
+                  <DialogActions>
+                    <Button onClick={handleDeleteRoom}>OK</Button>
+                    <Button onClick={handleCloseDeleteRoom} autoFocus>
+                      Cancel
+                    </Button>
+                  </DialogActions>
+                </Dialog>
 
               </Grid>
             </Grid>
@@ -389,6 +397,18 @@ function MapDisplay() {
                         <Box border={1} style={{ marginTop: 10, marginLeft: 15 }}>
                           <Typography style={{ marginTop: 5, marginLeft: 5, boxSizing: "border-box" }}>Room</Typography>
                           <Typography style={{ marginLeft: 5, marginBottom: 5, boxSizing: "border-box" }}>{roomName}</Typography>
+                        </Box>
+                        <Box border={1} style={{ marginTop: 10, marginLeft: 15 }}>
+                          <FormControl component="fieldset" variant="standard" sx={{display: "flex", alignItems: "center", justifyContent: "center"}}>
+                            <FormGroup>
+                              <FormControlLabel
+                                control={
+                                  <Switch checked={showGrid} onChange={handleShowGrid} name="showgrid" />
+                                }
+                                label="Show Grid"
+                              />
+                            </FormGroup>
+                          </FormControl>
                         </Box>
                       </Stack>
                     </Grid>

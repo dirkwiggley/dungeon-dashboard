@@ -26,10 +26,38 @@ import Pillar_0_Highlight from '../assets/32_Pillar_0_Highlight.png';
 import Pillar_90_Highlight from '../assets/32_Pillar_90_Highlight.png';
 import Pillar_180_Highlight from '../assets/32_Pillar_180_Highlight.png';
 import Pillar_270_Highlight from '../assets/32_Pillar_270_Highlight.png';
+import L_0_GO from '../assets/32_L_0_Base_go.png';
+import L_90_GO from '../assets/32_L_90_Base_go.png';
+import L_180_GO from '../assets/32_L_180_Base_go.png';
+import L_270_GO from '../assets/32_L_270_Base_go.png';
+import I_0_GO from '../assets/32_I_0_Base_go.png';
+import I_90_GO from '../assets/32_I_90_Base_go.png';
+import I_180_GO from '../assets/32_I_180_Base_go.png';
+import I_270_GO from '../assets/32_I_270_Base_go.png';
+import Solid_GO from '../assets/32_Solid_go.png';
+import Open_GO from '../assets/32_Open_Base_go.png';
+import Pillar_0_GO from '../assets/32_Pillar_0_Base_go.png';
+import Pillar_90_GO from '../assets/32_Pillar_90_Base_go.png';
+import Pillar_180_GO from '../assets/32_Pillar_180_Base_go.png';
+import Pillar_270_GO from '../assets/32_Pillar_270_Base_go.png';
+import L_0_Highlight_GO from '../assets/32_L_0_Highlight_go.png';
+import L_90_Highlight_GO from '../assets/32_L_90_Highlight_go.png';
+import L_180_Highlight_GO from '../assets/32_L_180_Highlight_go.png';
+import L_270_Highlight_GO from '../assets/32_L_270_Highlight_go.png';
+import I_0_Highlight_GO from '../assets/32_I_0_Highlight_go.png';
+import I_90_Highlight_GO from '../assets/32_I_90_Highlight_go.png';
+import I_180_Highlight_GO from '../assets/32_I_180_Highlight_go.png';
+import I_270_Highlight_GO from '../assets/32_I_270_Highlight_go.png';
+import Solid_Highlight_GO from '../assets/32_Solid_Highlight_go.png';
+import Open_Highlight_GO from '../assets/32_Open_Highlight_go.png';
+import Pillar_0_Highlight_GO from '../assets/32_Pillar_0_Highlight_go.png';
+import Pillar_90_Highlight_GO from '../assets/32_Pillar_90_Highlight_go.png';
+import Pillar_180_Highlight_GO from '../assets/32_Pillar_180_Highlight_go.png';
+import Pillar_270_Highlight_GO from '../assets/32_Pillar_270_Highlight_go.png';
 import {TileName} from './NewTiles';
 
 
-type TileData = typeof L_0 | typeof L_90 | typeof L_180 | typeof L_270 | typeof I_0 | typeof I_90 | typeof I_180 | typeof I_270 | typeof Solid | typeof Open | typeof Pillar_0 | typeof Pillar_90 | typeof Pillar_180 | typeof Pillar_270 | typeof L_0_Highlight | typeof L_90_Highlight | typeof L_180_Highlight | typeof L_270_Highlight | typeof I_0_Highlight | typeof I_90_Highlight | typeof I_180_Highlight | typeof I_270_Highlight | typeof Solid_Highlight | typeof Open_Highlight | typeof Pillar_0_Highlight | typeof Pillar_90_Highlight | typeof Pillar_180_Highlight | typeof Pillar_270_Highlight;
+type TileData = typeof L_0 | typeof L_90 | typeof L_180 | typeof L_270 | typeof I_0 | typeof I_90 | typeof I_180 | typeof I_270 | typeof Solid | typeof Open | typeof Pillar_0 | typeof Pillar_90 | typeof Pillar_180 | typeof Pillar_270 | typeof L_0_Highlight | typeof L_90_Highlight | typeof L_180_Highlight | typeof L_270_Highlight | typeof I_0_Highlight | typeof I_90_Highlight | typeof I_180_Highlight | typeof I_270_Highlight | typeof Solid_Highlight | typeof Open_Highlight | typeof Pillar_0_Highlight | typeof Pillar_90_Highlight | typeof Pillar_180_Highlight | typeof Pillar_270_Highlight | typeof L_0_GO | typeof L_90_GO | typeof L_180_GO | typeof L_270_GO | typeof I_0_GO | typeof I_90_GO | typeof I_180_GO | typeof I_270_GO | typeof Solid_GO | typeof Open_GO | typeof Pillar_0_GO | typeof Pillar_90_GO | typeof Pillar_180_GO | typeof Pillar_270_GO | typeof L_0_Highlight_GO | typeof L_90_Highlight_GO | typeof L_180_Highlight_GO | typeof L_270_Highlight_GO | typeof I_0_Highlight_GO | typeof I_90_Highlight_GO | typeof I_180_Highlight_GO | typeof I_270_Highlight_GO | typeof Solid_Highlight_GO | typeof Open_Highlight_GO | typeof Pillar_0_Highlight_GO | typeof Pillar_90_Highlight_GO | typeof Pillar_180_Highlight_GO | typeof Pillar_270_Highlight_GO;
 
 type TileType = {
   name: TileName,
@@ -64,6 +92,33 @@ const tiles: Array<TileType> = [
   { name: "Pillar_90_Highlight", data: Pillar_90_Highlight},
   { name: "Pillar_180_Highlight", data: Pillar_180_Highlight},
   { name: "Pillar_270_Highlight", data: Pillar_270_Highlight},
+  { name: "L_0_GO", data: L_0_GO},
+  { name: "L_90_GO", data: L_90_GO},
+  { name: "L_180_GO", data: L_180_GO},
+  { name: "L_270_GO", data: L_270_GO},
+  { name: "I_0_GO", data: I_0_GO},
+  { name: "I_90_GO", data: I_90_GO},
+  { name: "I_180_GO", data: I_180_GO},
+  { name: "I_270_GO", data: I_270_GO},
+  { name: "Solid_GO", data: Solid_GO},
+  { name: "Open_GO", data: Open_GO},
+  { name: "Pillar_0_GO", data: Pillar_0_GO},
+  { name: "Pillar_90_GO", data: Pillar_90_GO},
+  { name: "Pillar_180_GO", data: Pillar_180_GO},
+  { name: "Pillar_270_GO", data: Pillar_270_GO},
+  { name: "L_0_Highlight_GO", data: L_0_Highlight_GO},
+  { name: "L_90_Highlight_GO", data: L_90_Highlight_GO},
+  { name: "L_180_Highlight_GO", data: L_180_Highlight_GO},
+  { name: "L_270_Highlight_GO", data: L_270_Highlight_GO},
+  { name: "I_0_Highlight_GO", data: I_0_Highlight_GO},
+  { name: "I_90_Highlight_GO", data: I_90_Highlight_GO},
+  { name: "I_180_Highlight_GO", data: I_180_Highlight_GO},
+  { name: "I_270_Highlight_GO", data: I_270_Highlight_GO},
+  { name: "Solid_Highlight_GO", data: Solid_Highlight_GO},
+  { name: "Open_Highlight_GO", data: Open_Highlight_GO},
+  { name: "Pillar_0_Highlight_GO", data: Pillar_0_Highlight_GO},
+  { name: "Pillar_180_Highlight_GO", data: Pillar_180_Highlight_GO},
+  { name: "Pillar_270_Highlight_GO", data: Pillar_270_Highlight_GO},
 ]
 
 export const Tiles32 = {
