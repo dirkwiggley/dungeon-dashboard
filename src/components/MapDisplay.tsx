@@ -5,6 +5,7 @@ import TilePalette, { SELECT, EDIT, BUILD_ROOM, EditorModes } from './TilePalett
 import { TileName, NewTiles } from './NewTiles';
 import { Tiles32 } from './Tiles32';
 import { Tiles64 } from './Tiles64';
+import HelloDialog from './HelloDialog';
 
 let dungeonMap: Array<TileName> = [
   "Solid", "Solid", "Solid", "Solid", "Solid", "Solid", "Solid", "Open",
@@ -65,6 +66,7 @@ function MapDisplay() {
   const [newTiles, setNewTiles] = useState<Array<NewTiles>>();
   const [deleteRoomName, setDeleteRoomName] = useState<string>('');
   const [showGrid, setShowGrid] = useState<boolean>(false);
+  const [showHello, setShowHello] = useState<boolean>(true);
 
   useEffect(() => {
     let rd = new RoomEditor(Rooms);
@@ -339,95 +341,113 @@ function MapDisplay() {
     setShowGrid(!showGrid);
   }
 
-  return (
-    <Stack minWidth="100vw" sx={{ marginTop: 2 }}>
-      <Grid container sx={{ paddingLeft: "15px", minWidth: "100%", maxWidth: "100%" }}>
-        <Grid item>
-          <Paper sx={{ paddingBottom: 2, bgcolor: "#c9a00c", minWidth: "100%", maxWidth: "100%" }}>
-            <Grid container>
-              <Grid item xs={12}>
-                <Dialog
-                  open={deleteRoomName !== ''}
-                  onClose={handleCloseDeleteRoom}
-                  aria-labelledby="alert-dialog-title"
-                  aria-describedby="alert-dialog-description"
-                >
-                  <DialogTitle id="alert-dialog-title">
-                    {`Delete the room ${deleteRoomName}?`}
-                  </DialogTitle>
-                  <DialogContent>
-                    <DialogContentText id="alert-dialog-description">
-                      This action will not delete tiles, just information on the
-                      grouping of tiles that make up the room to be deleted.
-                    </DialogContentText>
-                  </DialogContent>
-                  <DialogActions>
-                    <Button onClick={handleDeleteRoom}>OK</Button>
-                    <Button onClick={handleCloseDeleteRoom} autoFocus>
-                      Cancel
-                    </Button>
-                  </DialogActions>
-                </Dialog>
+  const handleCloseHello = () => {
+    setShowHello(false);
+  }
 
+  const getHelloDialog = () => {
+    if (showHello) {
+      return (
+        <Stack>
+          <HelloDialog onClose={handleCloseHello} />
+        </Stack>
+      )
+    }
+    return null;
+  }
+
+  return (
+    <>
+      { getHelloDialog() }
+      <Stack minWidth="100vw" sx={{ marginTop: 2 }}>
+        <Grid container sx={{ paddingLeft: "15px", minWidth: "100%", maxWidth: "100%" }}>
+          <Grid item>
+            <Paper sx={{ paddingBottom: 2, bgcolor: "#c9a00c", minWidth: "100%", maxWidth: "100%" }}>
+              <Grid container>
+                <Grid item xs={12}>
+                  <Dialog
+                    open={deleteRoomName !== ''}
+                    onClose={handleCloseDeleteRoom}
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description"
+                  >
+                    <DialogTitle id="alert-dialog-title">
+                      {`Delete the room ${deleteRoomName}?`}
+                    </DialogTitle>
+                    <DialogContent>
+                      <DialogContentText id="alert-dialog-description">
+                        This action will not delete tiles, just information on the
+                        grouping of tiles that make up the room to be deleted.
+                      </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                      <Button onClick={handleDeleteRoom}>OK</Button>
+                      <Button onClick={handleCloseDeleteRoom} autoFocus>
+                        Cancel
+                      </Button>
+                    </DialogActions>
+                  </Dialog>
+
+                </Grid>
               </Grid>
-            </Grid>
-            <Grid container sx={{ marginTop: 2 }}>
-              <Grid item>
-                <Box style={{ minWidth: "100%", maxWidth: "100%", maxHeight: TEN_TWENTY_FOUR_PX, marginTop: "15px" }}>
-                  {getDisplayTiles()}
-                  <Grid container justifyContent='space-evenly'>
-                    <Grid item xs={3}>
-                      <FormControl fullWidth style={{ marginTop: "15px", marginLeft: 20 }}>
-                        <InputLabel id="size-select-label">Tile Size</InputLabel>
-                        <StyledSelect
-                          labelId="size-select-label"
-                          id="size-select"
-                          value={tileSize}
-                          label="Tile Size"
-                          onChange={handleSizeChange}
-                        >
-                          <MenuItem value={THIRTY_TWO_PX}>{THIRTY_TWO_PX}</MenuItem>
-                          <MenuItem value={SIXTY_FOUR_PX}>{SIXTY_FOUR_PX}</MenuItem>
-                        </StyledSelect>
-                      </FormControl>
+              <Grid container sx={{ marginTop: 2 }}>
+                <Grid item>
+                  <Box style={{ minWidth: "100%", maxWidth: "100%", maxHeight: TEN_TWENTY_FOUR_PX, marginTop: "15px" }}>
+                    {getDisplayTiles()}
+                    <Grid container justifyContent='space-evenly'>
+                      <Grid item xs={3}>
+                        <FormControl fullWidth style={{ marginTop: "15px", marginLeft: 20 }}>
+                          <InputLabel id="size-select-label">Tile Size</InputLabel>
+                          <StyledSelect
+                            labelId="size-select-label"
+                            id="size-select"
+                            value={tileSize}
+                            label="Tile Size"
+                            onChange={handleSizeChange}
+                          >
+                            <MenuItem value={THIRTY_TWO_PX}>{THIRTY_TWO_PX}</MenuItem>
+                            <MenuItem value={SIXTY_FOUR_PX}>{SIXTY_FOUR_PX}</MenuItem>
+                          </StyledSelect>
+                        </FormControl>
+                      </Grid>
+                      <Grid item xs={1} />
+                      <Grid item xs={6}>
+                        <Stack>
+                          <Box border={1} style={{ marginTop: 10, marginLeft: 15 }}>
+                            <Typography style={{ marginTop: 5, marginLeft: 5, boxSizing: "border-box" }}>Room</Typography>
+                            <Typography style={{ marginLeft: 5, marginBottom: 5, boxSizing: "border-box" }}>{roomName}</Typography>
+                          </Box>
+                          <Box border={1} style={{ marginTop: 10, marginLeft: 15 }}>
+                            <FormControl component="fieldset" variant="standard" sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                              <FormGroup>
+                                <FormControlLabel
+                                  control={
+                                    <Switch checked={showGrid} onChange={handleShowGrid} name="showgrid" />
+                                  }
+                                  label="Show Grid"
+                                />
+                              </FormGroup>
+                            </FormControl>
+                          </Box>
+                        </Stack>
+                      </Grid>
+                      <Grid item xs={2} />
                     </Grid>
-                    <Grid item xs={1} />
-                    <Grid item xs={6}>
-                      <Stack>
-                        <Box border={1} style={{ marginTop: 10, marginLeft: 15 }}>
-                          <Typography style={{ marginTop: 5, marginLeft: 5, boxSizing: "border-box" }}>Room</Typography>
-                          <Typography style={{ marginLeft: 5, marginBottom: 5, boxSizing: "border-box" }}>{roomName}</Typography>
-                        </Box>
-                        <Box border={1} style={{ marginTop: 10, marginLeft: 15 }}>
-                          <FormControl component="fieldset" variant="standard" sx={{display: "flex", alignItems: "center", justifyContent: "center"}}>
-                            <FormGroup>
-                              <FormControlLabel
-                                control={
-                                  <Switch checked={showGrid} onChange={handleShowGrid} name="showgrid" />
-                                }
-                                label="Show Grid"
-                              />
-                            </FormGroup>
-                          </FormControl>
-                        </Box>
-                      </Stack>
-                    </Grid>
-                    <Grid item xs={2} />
-                  </Grid>
-                </Box>
+                  </Box>
+                </Grid>
+                <Grid item>
+                  <TilePalette
+                    changeTile={handleChangePaletteTile}
+                    changeEditMode={handleChangeEditMode}
+                    handleCommit={handleCommit}
+                    handleCancel={handleCancel} />
+                </Grid>
               </Grid>
-              <Grid item>
-                <TilePalette
-                  changeTile={handleChangePaletteTile}
-                  changeEditMode={handleChangeEditMode}
-                  handleCommit={handleCommit}
-                  handleCancel={handleCancel} />
-              </Grid>
-            </Grid>
-          </Paper>
+            </Paper>
+          </Grid>
         </Grid>
-      </Grid>
-    </Stack>
+      </Stack>
+    </>
   );
 }
 
