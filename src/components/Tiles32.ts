@@ -117,6 +117,7 @@ const tiles: Array<TileType> = [
   { name: "Solid_Highlight_GO", data: Solid_Highlight_GO},
   { name: "Open_Highlight_GO", data: Open_Highlight_GO},
   { name: "Pillar_0_Highlight_GO", data: Pillar_0_Highlight_GO},
+  { name: "Pillar_90_Highlight_GO", data: Pillar_90_Highlight_GO},
   { name: "Pillar_180_Highlight_GO", data: Pillar_180_Highlight_GO},
   { name: "Pillar_270_Highlight_GO", data: Pillar_270_Highlight_GO},
 ]
