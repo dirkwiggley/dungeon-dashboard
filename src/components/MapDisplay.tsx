@@ -395,7 +395,7 @@ function MapDisplay() {
                   <Box style={{ minWidth: "100%", maxWidth: "100%", maxHeight: TEN_TWENTY_FOUR_PX, marginTop: "15px" }}>
                     {getDisplayTiles()}
                     <Grid container justifyContent='space-evenly'>
-                      <Grid item xs={3}>
+                      {/* <Grid item xs={3}>
                         <FormControl fullWidth style={{ marginTop: "15px", marginLeft: 20 }}>
                           <InputLabel id="size-select-label">Tile Size</InputLabel>
                           <StyledSelect
@@ -409,7 +409,7 @@ function MapDisplay() {
                             <MenuItem value={SIXTY_FOUR_PX}>{SIXTY_FOUR_PX}</MenuItem>
                           </StyledSelect>
                         </FormControl>
-                      </Grid>
+                      </Grid> */}
                       <Grid item xs={1} />
                       <Grid item xs={6}>
                         <Stack>
