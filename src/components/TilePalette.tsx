@@ -17,6 +17,7 @@ import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, D
 import { Tiles32 } from './Tiles32';
 import { grey } from '@mui/material/colors';
 import { TileName } from './NewTiles';
+import HowToDialog from './HowToDialog';
 
 type TileData = typeof L_0 | typeof L_90 | typeof L_180 | typeof L_270 | typeof I_0 | typeof I_90 | typeof I_180 | typeof I_270 | typeof Solid | typeof Open | typeof Pillar_0 | typeof Pillar_90 | typeof Pillar_180 | typeof Pillar_270;
 
@@ -60,6 +61,7 @@ const TilePalette = (props: { changeTile: any; changeEditMode: any, handleCommit
   const [editorMode, setEditorMode] = useState<EditorModes>(SELECT);
   const [openEnterNameDlg, setOpenEnterNameDlg] = useState<boolean>(false);
   const [roomName, setRoomName] = useState<string>("");
+  const [openHowTo, setOpenHowTo] = useState<boolean>(false);
 
   const handlePaletteClick = (index: number) => {
     const tiles32 = Object.create(Tiles32);
@@ -166,40 +168,55 @@ const TilePalette = (props: { changeTile: any; changeEditMode: any, handleCommit
     setRoomName(value);
   }
 
+  const handleHowToClick = () => {
+    setOpenHowTo(!openHowTo);
+  }
+
+  const handleClostHowToDlg = () => {
+    setOpenHowTo(false);
+  }
+
+  const getHowToDlg = () => {
+    if (openHowTo) {
+      return (
+        <HowToDialog onClose={handleClostHowToDlg} />
+      );
+    }
+    return null;
+  }
+
   const getRoomButtons = () => {
     if (editorMode === BUILD_ROOM || editorMode === EDIT) {
       return (
-        <>
-          <Grid container spacing={1}>
-            <Grid item xs={12} sx={{ marginBottom: 1, display: "flex", alignItems: "center", justifyContent: "center", minWidth: "100%", maxWidth: "100%" }}>
-              <StyledButton variant="contained" onClick={onCommit}>Commit</StyledButton>
-            </Grid>
-            <Grid item>
-              <Dialog open={openEnterNameDlg} onClose={() => handleClose()}>
-                <DialogTitle>Enter Room Name</DialogTitle>
-                <DialogContent>
-                  <DialogContentText>
-                    A new room requires a unique name.
-                  </DialogContentText>
-                  <TextField
-                    autoFocus
-                    margin="dense"
-                    id="name"
-                    label="Room Name"
-                    type="text"
-                    fullWidth
-                    variant="standard"
-                    onChange={(event) => handleOnInput(event)}
-                  />
-                </DialogContent>
-                <DialogActions>
-                  <Button onClick={onCancel}>Cancel</Button>
-                  <Button onClick={submitRoom}>Submit</Button>
-                </DialogActions>
-              </Dialog>
-            </Grid>
+        <Grid container spacing={1}>
+          <Grid item xs={12} sx={{ marginBottom: 1, display: "flex", alignItems: "center", justifyContent: "center", minWidth: "100%", maxWidth: "100%" }}>
+            <StyledButton variant="contained" onClick={onCommit}>Commit</StyledButton>
           </Grid>
-        </>
+          <Grid item>
+            <Dialog open={openEnterNameDlg} onClose={() => handleClose()}>
+              <DialogTitle>Enter Room Name</DialogTitle>
+              <DialogContent>
+                <DialogContentText>
+                  A new room requires a unique name.
+                </DialogContentText>
+                <TextField
+                  autoFocus
+                  margin="dense"
+                  id="name"
+                  label="Room Name"
+                  type="text"
+                  fullWidth
+                  variant="standard"
+                  onChange={(event) => handleOnInput(event)}
+                />
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={onCancel}>Cancel</Button>
+                <Button onClick={submitRoom}>Submit</Button>
+              </DialogActions>
+            </Dialog>
+          </Grid>
+        </Grid>
       )
     }
     return null;
@@ -208,6 +225,8 @@ const TilePalette = (props: { changeTile: any; changeEditMode: any, handleCommit
   return (
     <Paper sx={{ marginTop: "25px", marginLeft: 2, marginRight: 2, backgroundColor: "lightGray", minWidth: "254px", maxWidth: "264px" }}>
       <Stack>
+        {getHowToDlg()}
+
         <Grid container spacing={1}>
           <Grid item xs={12} sx={{ marginTop: 2, marginBottom: 2 }}>
             <Typography textAlign="center">Tile Palette</Typography>
@@ -234,10 +253,12 @@ const TilePalette = (props: { changeTile: any; changeEditMode: any, handleCommit
           <Grid item xs={12} sx={{ marginTop: 1, display: "flex", alignItems: "center", justifyContent: "center", minWidth: "100%", maxWidth: "100%" }}>
             <StyledButton variant="contained" onClick={() => onChangeEditMode(INCREMENT)}>{getEditModeBtnText()}</StyledButton>
           </Grid>
-          <Grid item xs={12} sx={{ marginTop: 1, marginBottom: 1, display: "flex", alignItems: "center", justifyContent: "center", minWidth: "100%", maxWidth: "100%" }}>
+          <Grid item xs={12} sx={{ marginTop: 1, display: "flex", alignItems: "center", justifyContent: "center", minWidth: "100%", maxWidth: "100%" }}>
             <StyledButton variant="contained" onClick={onCancel}>Cancel</StyledButton>
           </Grid>
-
+          <Grid item xs={12} sx={{ marginTop: 1, marginBottom: 1, display: "flex", alignItems: "center", justifyContent: "center", minWidth: "100%", maxWidth: "100%" }}>
+            <StyledButton variant="contained" onClick={handleHowToClick}>How To Use</StyledButton>
+          </Grid>
         </Grid>
         {getRoomButtons()}
       </Stack>
