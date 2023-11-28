@@ -387,8 +387,8 @@ function MapDisplay() {
                     </DialogTitle>
                     <DialogContent>
                       <DialogContentText id="delete-dialog-description">
-                        This action will not delete tiles, just information on the
-                        grouping of tiles that make up the room to be deleted.
+                        You are modifying a tile that exists within a room. This action will not delete tiles, 
+                        just information on the grouping of tiles that make up the room to be deleted.
                       </DialogContentText>
                     </DialogContent>
                     <DialogActions>
