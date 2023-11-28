@@ -56,7 +56,7 @@ const StyledSelect = styled(Select)(() => ({
 
 const StyledSwitch = styled(Switch)(() => ({
   "& .Mui-checked": {
-    color: "#454545"
+    color: "black"
     // transform: "translateX(25px) !important"
   },
   "& .MuiSwitch-track": {
@@ -392,9 +392,9 @@ function MapDisplay() {
                       </DialogContentText>
                     </DialogContent>
                     <DialogActions>
-                      <Button onClick={handleDeleteRoom}>OK</Button>
+                      <Button onClick={handleDeleteRoom}>DO IT</Button>
                       <Button onClick={handleCloseDeleteRoom} autoFocus>
-                        Cancel
+                        DON'T DO IT
                       </Button>
                     </DialogActions>
                   </Dialog>
@@ -432,9 +432,7 @@ function MapDisplay() {
                             <FormControl component="fieldset" variant="standard" sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
                               <FormGroup>
                                 <FormControlLabel
-                                  control={
-                                    <StyledSwitch checked={showGrid} onChange={handleShowGrid} name="showgrid" />
-                                  }
+                                  control={<StyledSwitch checked={showGrid} onChange={handleShowGrid} name="showgrid" />}
                                   label="Show Grid"
                                 />
                               </FormGroup>

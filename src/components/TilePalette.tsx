@@ -251,13 +251,13 @@ const TilePalette = (props: { changeTile: any; changeEditMode: any, handleCommit
 
         <Grid container sx={{ spacing: 1 }}>
           <Grid item xs={12} sx={{ marginTop: 1, display: "flex", alignItems: "center", justifyContent: "center", minWidth: "100%", maxWidth: "100%" }}>
-            <StyledButton variant="contained" onClick={() => onChangeEditMode(INCREMENT)}>{getEditModeBtnText()}</StyledButton>
+            <StyledButton variant="contained" onClick={handleHowToClick}>How To Use</StyledButton>
           </Grid>
           <Grid item xs={12} sx={{ marginTop: 1, display: "flex", alignItems: "center", justifyContent: "center", minWidth: "100%", maxWidth: "100%" }}>
-            <StyledButton variant="contained" onClick={onCancel}>Cancel</StyledButton>
+            <StyledButton variant="contained" onClick={() => onChangeEditMode(INCREMENT)}>{getEditModeBtnText()}</StyledButton>
           </Grid>
           <Grid item xs={12} sx={{ marginTop: 1, marginBottom: 1, display: "flex", alignItems: "center", justifyContent: "center", minWidth: "100%", maxWidth: "100%" }}>
-            <StyledButton variant="contained" onClick={handleHowToClick}>How To Use</StyledButton>
+            <StyledButton variant="contained" onClick={onCancel}>Cancel</StyledButton>
           </Grid>
         </Grid>
         {getRoomButtons()}
