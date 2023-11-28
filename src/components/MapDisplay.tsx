@@ -6,6 +6,7 @@ import { TileName, NewTiles } from './NewTiles';
 import { Tiles32 } from './Tiles32';
 import { Tiles64 } from './Tiles64';
 import HelloDialog from './HelloDialog';
+import BackgroundBox from './BackgroundBox';
 
 let dungeonMap: Array<TileName> = [
   "Solid", "Solid", "Solid", "Solid", "Solid", "Solid", "Solid", "Open",
@@ -50,6 +51,16 @@ const StyledSelect = styled(Select)(() => ({
     "&.Mui-focused fieldset": {
       borderColor: "grey"
     },
+  }
+}));
+
+const StyledSwitch = styled(Switch)(() => ({
+  "& .Mui-checked": {
+    color: "#454545"
+    // transform: "translateX(25px) !important"
+  },
+  "& .MuiSwitch-track": {
+    backgroundColor: "#000 !important"
   }
 }));
 
@@ -268,7 +279,7 @@ function MapDisplay() {
       returnArray.push(<Box key={`row_${rowCounter.toString()}`} sx={{ display: "flex" }}>{tempArray}</Box>);
     }
     return (
-      <Box border={1} sx={{ minWidth: getMaxWidthPx(), maxWidth: getMaxWidthPx(), minHeight: "300px", maxHeight: "300px", marginLeft: 2, overflowX: "scroll", overflowY: "scroll" }}>
+      <Box border={1} sx={{ minWidth: getMaxWidthPx(), maxWidth: getMaxWidthPx(), minHeight: "320px", maxHeight: "320px", marginLeft: 2, overflowX: "auto", overflowY: "auto" }}>
         {returnArray}
       </Box>
     );
@@ -357,25 +368,25 @@ function MapDisplay() {
   }
 
   return (
-    <>
+    <BackgroundBox>
       { getHelloDialog() }
       <Stack minWidth="100vw" sx={{ marginTop: 2 }}>
         <Grid container sx={{ paddingLeft: "15px", minWidth: "100%", maxWidth: "100%" }}>
           <Grid item>
-            <Paper sx={{ paddingBottom: 2, bgcolor: "#c9a00c", minWidth: "100%", maxWidth: "100%" }}>
+            <Paper sx={{ paddingBottom: 2, bgcolor: "rgb(255, 255, 255, 0.1)", minWidth: "100%", maxWidth: "100%" }}>
               <Grid container>
                 <Grid item xs={12}>
                   <Dialog
                     open={deleteRoomName !== ''}
                     onClose={handleCloseDeleteRoom}
-                    aria-labelledby="alert-dialog-title"
-                    aria-describedby="alert-dialog-description"
+                    aria-labelledby="delete-dialog-title"
+                    aria-describedby="delete-dialog-description"
                   >
-                    <DialogTitle id="alert-dialog-title">
+                    <DialogTitle id="delete-dialog-title">
                       {`Delete the room ${deleteRoomName}?`}
                     </DialogTitle>
                     <DialogContent>
-                      <DialogContentText id="alert-dialog-description">
+                      <DialogContentText id="delete-dialog-description">
                         This action will not delete tiles, just information on the
                         grouping of tiles that make up the room to be deleted.
                       </DialogContentText>
@@ -422,7 +433,7 @@ function MapDisplay() {
                               <FormGroup>
                                 <FormControlLabel
                                   control={
-                                    <Switch checked={showGrid} onChange={handleShowGrid} name="showgrid" />
+                                    <StyledSwitch checked={showGrid} onChange={handleShowGrid} name="showgrid" />
                                   }
                                   label="Show Grid"
                                 />
@@ -447,7 +458,7 @@ function MapDisplay() {
           </Grid>
         </Grid>
       </Stack>
-    </>
+    </BackgroundBox>
   );
 }
 
